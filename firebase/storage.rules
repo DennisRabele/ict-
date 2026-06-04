@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /customer/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    match /admin/{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

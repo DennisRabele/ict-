@@ -1,0 +1,15 @@
+<svg width="720" height="450" viewBox="0 0 720 450" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Rack server</title>
+  <desc id="desc">A server placeholder for admin inventory.</desc>
+  <rect width="720" height="450" fill="#F8FAFC"/>
+  <rect x="150" y="72" width="420" height="306" rx="18" fill="#0B1320"/>
+  <rect x="178" y="104" width="364" height="66" rx="10" fill="#1F2937"/>
+  <rect x="178" y="192" width="364" height="66" rx="10" fill="#1F2937"/>
+  <rect x="178" y="280" width="364" height="66" rx="10" fill="#1F2937"/>
+  <circle cx="214" cy="137" r="10" fill="#14B8A6"/>
+  <circle cx="214" cy="225" r="10" fill="#F59E0B"/>
+  <circle cx="214" cy="313" r="10" fill="#14B8A6"/>
+  <rect x="250" y="127" width="244" height="20" rx="10" fill="#CBD5E1"/>
+  <rect x="250" y="215" width="244" height="20" rx="10" fill="#CBD5E1"/>
+  <rect x="250" y="303" width="244" height="20" rx="10" fill="#CBD5E1"/>
+</svg>

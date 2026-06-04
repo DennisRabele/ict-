@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | ICT Commerce</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="side-rail">
+        <a class="brand-lockup compact" href="dashboard.html" aria-label="Admin dashboard home">
+          <span class="brand-mark">IC</span>
+          <span>Admin</span>
+        </a>
+        <nav class="nav-list" aria-label="Admin modules">
+          <button class="nav-item active" data-view="inventory"><span>01</span> Inventory</button>
+          <button class="nav-item" data-view="orders"><span>02</span> Orders</button>
+          <button class="nav-item" data-view="queries"><span>03</span> Queries</button>
+          <button class="nav-item" data-view="sales"><span>04</span> Sales</button>
+        </nav>
+      </aside>
+
+      <main class="main-stage">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Admin control center</p>
+            <h1 id="viewTitle">Inventory</h1>
+          </div>
+          <button id="adminLogout" class="ghost-action" type="button">Log out</button>
+        </header>
+        <div id="adminNotice" class="auth-notice dashboard-notice" hidden></div>
+
+        <section class="view active" id="inventory">
+          <div class="metric-grid">
+            <article class="metric-card"><span>Products</span><strong id="productCount">0</strong><small>Published inventory</small></article>
+            <article class="metric-card"><span>Orders</span><strong id="orderCount">0</strong><small>Customer checkouts</small></article>
+            <article class="metric-card"><span>Queries</span><strong id="queryCount">0</strong><small>Customer messages</small></article>
+          </div>
+          <div class="workspace-grid two-column">
+            <article class="panel wide-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Inventory</p>
+                  <h2>Products shown to customers</h2>
+                </div>
+                <input id="inventorySearch" type="search" placeholder="Search products" />
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Class</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inventoryTable"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Post product</p>
+                  <h2>Add inventory</h2>
+                </div>
+              </div>
+              <form id="inventoryForm" class="stacked-form" novalidate>
+                <label>Inventory class<select id="inventoryCategory" required></select></label>
+                <label>Product name<input id="inventoryName" required maxlength="60" pattern="[A-Za-z0-9 ]+" /></label>
+                <label>Price<input id="inventoryPrice" type="number" min="0.01" step="0.01" required inputmode="decimal" /></label>
+                <label>Product details<textarea id="inventoryDetails" placeholder="Specs, size, memory, storage, condition notes, warranty, or any customer-facing details" required></textarea></label>
+                <label>Available stock<input id="inventoryStock" type="number" min="1" step="1" value="1" required inputmode="numeric" /></label>
+                <label>Select photo<select id="inventoryPhotoChoice" required></select></label>
+                <img id="inventoryPhotoPreview" class="photo-preview" alt="Selected product photo preview" />
+                <button class="primary-action" type="submit"><span class="button-icon">P</span>Post product</button>
+              </form>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="orders">
+          <article class="panel wide-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Orders</p>
+                <h2>Paid customer orders</h2>
+              </div>
+            </div>
+            <div id="orderBoard" class="row-stack"></div>
+          </article>
+        </section>
+
+        <section class="view" id="queries">
+          <article class="panel wide-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Queries</p>
+                <h2>Complaints, questions, and delivery tracking</h2>
+              </div>
+            </div>
+            <div id="queryBoard" class="row-stack"></div>
+          </article>
+        </section>
+
+        <section class="view" id="sales">
+          <article class="panel wide-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Sales</p>
+                <h2>Sold stock and product revenue</h2>
+              </div>
+              <span id="salesTotal" class="status-pill">M0</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Class</th>
+                    <th>Available stock</th>
+                    <th>Sold</th>
+                    <th>Left</th>
+                    <th>Total sales</th>
+                  </tr>
+                </thead>
+                <tbody id="salesTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>

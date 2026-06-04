@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Access | ICT Commerce</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body class="login-page">
+    <main class="login-shell admin-login">
+      <section class="login-panel">
+        <div class="brand-lockup">
+          <span class="brand-mark">IC</span>
+          <div>
+            <p class="eyebrow">Admin route</p>
+            <h1>Operations Console</h1>
+          </div>
+        </div>
+        <div id="authNotice" class="auth-notice" hidden></div>
+        <form id="adminRegisterForm" class="login-form">
+          <div>
+            <p class="eyebrow">Create admin</p>
+            <h2>Register before login</h2>
+          </div>
+          <label>
+            First Name
+            <input id="registerFirstName" name="firstName" autocomplete="given-name" required />
+          </label>
+          <label>
+            Second Name
+            <input id="registerSecondName" name="secondName" autocomplete="family-name" required />
+          </label>
+          <label>
+            Email address
+            <input id="registerEmail" name="email" type="email" placeholder="name@gmail.com" autocomplete="email" required />
+          </label>
+          <label>
+            Password
+            <input id="registerPassword" name="password" type="password" autocomplete="new-password" required />
+          </label>
+          <button type="submit" class="primary-action">
+            <span class="button-icon">R</span>
+            Register admin
+          </button>
+          <button type="button" id="showLoginBtn" class="ghost-action">Already have account, login</button>
+        </form>
+        <form id="adminLoginForm" class="login-form" hidden>
+          <div>
+            <p class="eyebrow">Admin login</p>
+            <h2>Enter all registered details</h2>
+          </div>
+          <label>
+            First Name
+            <input id="loginFirstName" name="firstName" autocomplete="given-name" required />
+          </label>
+          <label>
+            Second Name
+            <input id="loginSecondName" name="secondName" autocomplete="family-name" required />
+          </label>
+          <label>
+            Email address
+            <input id="loginEmail" name="email" type="email" placeholder="name@gmail.com" autocomplete="email" required />
+          </label>
+          <label>
+            Password
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="primary-action">
+            <span class="button-icon">A</span>
+            Enter admin dashboard
+          </button>
+          <button type="button" id="showRegisterBtn" class="ghost-action">Register another admin</button>
+        </form>
+      </section>
+      <aside class="login-visual">
+        <img src="assets/ops-suite.svg" alt="ICT operations dashboard preview" />
+      </aside>
+    </main>
+    <script type="module" src="/auth.js"></script>
+  </body>
+</html>

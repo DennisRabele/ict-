@@ -1,0 +1,15 @@
+{
+  "name": "ICT Commerce Customer App",
+  "short_name": "ICT Customer",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0B1320",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+<svg width="520" height="520" viewBox="0 0 520 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Mobile customer app</title>
+  <desc id="desc">A stylized mobile ICT commerce app screen.</desc>
+  <rect width="520" height="520" rx="64" fill="#0B1320"/>
+  <rect x="136" y="48" width="248" height="424" rx="34" fill="#F8FAFC"/>
+  <rect x="166" y="92" width="188" height="52" rx="18" fill="#14B8A6"/>
+  <rect x="166" y="170" width="82" height="82" rx="18" fill="#0B1320"/>
+  <rect x="272" y="170" width="82" height="82" rx="18" fill="#F59E0B"/>
+  <rect x="166" y="282" width="188" height="22" rx="11" fill="#0B1320"/>
+  <rect x="166" y="332" width="136" height="22" rx="11" fill="#14B8A6"/>
+  <rect x="166" y="382" width="188" height="46" rx="18" fill="#F59E0B"/>
+</svg>

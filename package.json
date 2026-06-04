@@ -1,0 +1,24 @@
+{
+  "name": "ict-commerce-suite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:web": "vite --config \"React App/vite.config.js\" --host 127.0.0.1 --port 5173",
+    "dev:mobile": "vite --config \"Client/vite.config.js\" --host 127.0.0.1 --port 5174",
+    "dev:admin": "vite --config \"Admin/vite.config.js\" --host 127.0.0.1 --port 5175",
+    "build:web": "vite build --config \"React App/vite.config.js\"",
+    "build:mobile": "vite build --config \"Client/vite.config.js\"",
+    "build:admin": "vite build --config \"Admin/vite.config.js\"",
+    "firebase:login": "firebase login --no-localhost",
+    "firebase:deploy-rules": "firebase deploy --only firestore:rules,storage --project ict-ecommerce",
+    "seed:firebase": "node firebase/seed.mjs"
+  },
+  "dependencies": {
+    "firebase": "^12.6.0",
+    "vite": "^5.4.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.19.0"
+  }
+}
