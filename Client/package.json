@@ -2,21 +2,18 @@
   "name": "ict-commerce-mobile",
   "version": "1.0.0",
   "private": true,
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^2.2.0",
-    "babel-preset-expo": "~54.0.10",
-    "expo": "^54.0.0",
-    "expo-camera": "~17.0.10",
-    "expo-status-bar": "~3.0.9",
     "firebase": "^10.0.0",
-    "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
   }
 }

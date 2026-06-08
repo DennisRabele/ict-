@@ -1,6 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   addDoc,
   collection,
@@ -18,17 +16,6 @@ import {
   mergeCatalogAndInventory,
   sortProducts
 } from "../firebase/catalog.js";
-import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Image
-} from "react-native";
 
 const SESSION_KEY = "ict-mobile-session";
 const ACCOUNTS_KEY = "ict-mobile-accounts";
@@ -96,8 +83,8 @@ export default function App() {
 
   async function loadStorageSession() {
     try {
-      const rawSession = await AsyncStorage.getItem(SESSION_KEY);
-      const rawAccounts = await AsyncStorage.getItem(ACCOUNTS_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+      const rawAccounts = localStorage.getItem(ACCOUNTS_KEY);
       if (rawAccounts) {
         setAccounts(JSON.parse(rawAccounts));
       }
@@ -193,7 +180,7 @@ export default function App() {
       setAuthMessage("Registration saved locally. Firebase profile could not be recorded right now.");
     }
     const nextAccounts = [...accounts, account];
-    await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(nextAccounts));
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(nextAccounts));
     setAccounts(nextAccounts);
     setAuthMessage("Registration successful. Please log in.");
     setScreen("login");
@@ -223,7 +210,7 @@ export default function App() {
       setAuthMessage("Login unsuccessful: details do not match a registered customer.");
       return;
     }
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(existing));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
     setUser(existing);
     setLoginData({ firstName: "", secondName: "", email: "", password: "" });
     setScreen("products");
@@ -231,7 +218,7 @@ export default function App() {
   }
 
   function logout() {
-    AsyncStorage.removeItem(SESSION_KEY).catch(() => undefined);
+    localStorage.removeItem(SESSION_KEY);
     setUser(null);
     setScreen("login");
   }
@@ -466,338 +453,490 @@ export default function App() {
     setScreen("orders");
   }
 
-  function renderNavButton(name, label) {
-    return (
-      <TouchableOpacity key={name} style={[styles.tabButton, screen === name && styles.tabButtonActive]} onPress={() => setScreen(name)}>
-        <Text style={[styles.tabText, screen === name && styles.tabTextActive]}>{label}</Text>
-      </TouchableOpacity>
-    );
-  }
-
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#2A71FF" />
-      </SafeAreaView>
+      <div style={{ flex: 1, backgroundColor: "#F5F7FB", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <div style={{ fontSize: "24px" }}>Loading...</div>
+      </div>
     );
   }
 
   if (screen === "login" || screen === "register") {
     const isRegister = screen === "register";
     return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.authContainer}>
-          <Text style={styles.pageTitle}>{isRegister ? "Create account" : "Customer login"}</Text>
-          {authMessage ? <Text style={styles.errorText}>{authMessage}</Text> : null}
-          <TextInput style={styles.input} placeholder="First name" value={loginData.firstName} onChangeText={(text) => setLoginField("firstName", text)} />
-          <TextInput style={styles.input} placeholder="Second name" value={loginData.secondName} onChangeText={(text) => setLoginField("secondName", text)} />
-          <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" autoCapitalize="none" value={loginData.email} onChangeText={(text) => setLoginField("email", text)} />
-          <TextInput style={styles.input} placeholder="Password" secureTextEntry value={loginData.password} onChangeText={(text) => setLoginField("password", text)} />
-          <TouchableOpacity style={styles.primaryButton} onPress={isRegister ? register : login}>
-            <Text style={styles.primaryText}>{isRegister ? "Register" : "Enter mobile app"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.ghostButton} onPress={() => { setScreen(isRegister ? "login" : "register"); setAuthMessage(""); }}>
-            <Text style={styles.ghostText}>{isRegister ? "Already have account? Login" : "Create account"}</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </SafeAreaView>
+      <div style={{ flex: 1, backgroundColor: "#F5F7FB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "20px", overflowY: "auto" }}>
+          <div style={{ fontSize: "28px", fontWeight: "700", marginBottom: "16px", color: "#0F172A" }}>{isRegister ? "Create account" : "Customer login"}</div>
+          {authMessage ? <div style={{ color: "#B91C1C", marginBottom: "12px" }}>{authMessage}</div> : null}
+          <input 
+            style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+            placeholder="First name" 
+            value={loginData.firstName} 
+            onChange={(e) => setLoginField("firstName", e.target.value)} 
+          />
+          <input 
+            style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+            placeholder="Second name" 
+            value={loginData.secondName} 
+            onChange={(e) => setLoginField("secondName", e.target.value)} 
+          />
+          <input 
+            style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+            placeholder="Email" 
+            type="email"
+            value={loginData.email} 
+            onChange={(e) => setLoginField("email", e.target.value)} 
+          />
+          <input 
+            style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+            placeholder="Password" 
+            type="password"
+            value={loginData.password} 
+            onChange={(e) => setLoginField("password", e.target.value)} 
+          />
+          <button 
+            style={{ backgroundColor: "#2563EB", color: "#FFF", padding: "14px", borderRadius: "12px", border: "none", cursor: "pointer", fontWeight: "700", width: "100%", marginTop: "8px" }}
+            onClick={isRegister ? register : login}
+          >
+            {isRegister ? "Register" : "Enter mobile app"}
+          </button>
+          <button 
+            style={{ backgroundColor: "#FFF", color: "#334155", padding: "14px", borderRadius: "12px", border: "1px solid #CBD5E1", cursor: "pointer", fontWeight: "700", width: "100%", marginTop: "8px" }}
+            onClick={() => { setScreen(isRegister ? "login" : "register"); setAuthMessage(""); }}
+          >
+            {isRegister ? "Already have account? Login" : "Create account"}
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.brandMark}>IC</Text>
-          <Text style={styles.subtitle}>Customer App</Text>
-          <Text style={styles.title}>{screen === "products" ? "Products" : screen.charAt(0).toUpperCase() + screen.slice(1)}</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Log out</Text>
-        </TouchableOpacity>
-      </View>
-      <ScrollView contentContainerStyle={styles.content}>
+    <div style={{ flex: 1, backgroundColor: "#F5F7FB", minHeight: "100vh", display: "flex", flexDirection: "column", paddingBottom: "100px" }}>
+      <div style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: "24px", fontWeight: "700", color: "#1F2937" }}>IC</div>
+          <div style={{ fontSize: "12px", color: "#64748B" }}>Customer App</div>
+          <div style={{ fontSize: "28px", fontWeight: "700", color: "#0F172A" }}>{screen === "products" ? "Products" : screen.charAt(0).toUpperCase() + screen.slice(1)}</div>
+        </div>
+        <button 
+          style={{ padding: "8px 12px", borderRadius: "8px", backgroundColor: "#E2E8F0", border: "none", cursor: "pointer", color: "#0F172A", fontWeight: "600" }}
+          onClick={logout}
+        >
+          Log out
+        </button>
+      </div>
+      <div style={{ paddingLeft: "16px", paddingRight: "16px", paddingBottom: "80px", overflowY: "auto", flex: 1 }}>
         {screen === "products" && (
           <>
-            <View style={styles.filterPanel}>
-              <TextInput style={styles.input} placeholder="Search products" value={filters.search} onChangeText={(text) => setFilters((f) => ({ ...f, search: text }))} />
-              <View style={styles.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {["all", ...ICT_CATEGORIES].map((category) => (
-                    <TouchableOpacity key={category} style={[styles.chip, filters.category === category && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, category }))}>
-                      <Text style={[styles.chipText, filters.category === category && styles.chipTextActive]}>{category === "all" ? "All" : category}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              <View style={styles.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {["all", ...filteredBrands].map((brand) => (
-                    <TouchableOpacity key={brand} style={[styles.chip, filters.brand === brand && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, brand }))}>
-                      <Text style={[styles.chipText, filters.brand === brand && styles.chipTextActive]}>{brand === "all" ? "All brands" : brand}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              <View style={styles.filterRow}>
+            <div style={{ marginBottom: "16px" }}>
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Search products" 
+                value={filters.search} 
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))} 
+              />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+                {["all", ...ICT_CATEGORIES].map((category) => (
+                  <button 
+                    key={category}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: filters.category === category ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: filters.category === category ? "#2563EB" : "#FFF",
+                      color: filters.category === category ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setFilters((f) => ({ ...f, category }))}
+                  >
+                    {category === "all" ? "All" : category}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+                {["all", ...filteredBrands].map((brand) => (
+                  <button 
+                    key={brand}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: filters.brand === brand ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: filters.brand === brand ? "#2563EB" : "#FFF",
+                      color: filters.brand === brand ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setFilters((f) => ({ ...f, brand }))}
+                  >
+                    {brand === "all" ? "All brands" : brand}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
                 {[["all", "Any"], ["Available", "Available"], ["Out of stock", "Out of stock"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.availability === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, availability: value }))}>
-                    <Text style={[styles.chipText, filters.availability === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
+                  <button 
+                    key={value}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: filters.availability === value ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: filters.availability === value ? "#2563EB" : "#FFF",
+                      color: filters.availability === value ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setFilters((f) => ({ ...f, availability: value }))}
+                  >
+                    {label}
+                  </button>
                 ))}
-              </View>
-              <View style={styles.filterRow}>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
                 {[["all", "All cond"], ["New", "New"], ["Used", "Used"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.condition === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, condition: value }))}>
-                    <Text style={[styles.chipText, filters.condition === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
+                  <button 
+                    key={value}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: filters.condition === value ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: filters.condition === value ? "#2563EB" : "#FFF",
+                      color: filters.condition === value ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setFilters((f) => ({ ...f, condition: value }))}
+                  >
+                    {label}
+                  </button>
                 ))}
-              </View>
-              <View style={styles.priceRow}>
-                <TextInput style={[styles.input, styles.priceInput]} placeholder="Min" keyboardType="numeric" value={filters.priceMin} onChangeText={(text) => setFilters((f) => ({ ...f, priceMin: text }))} />
-                <TextInput style={[styles.input, styles.priceInput]} placeholder="Max" keyboardType="numeric" value={filters.priceMax} onChangeText={(text) => setFilters((f) => ({ ...f, priceMax: text }))} />
-              </View>
-              <View style={styles.filterRow}>
+              </div>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                <input 
+                  style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", borderWidth: "1px", borderColor: "#CBD5E1", flex: 1, boxSizing: "border-box" }} 
+                  placeholder="Min" 
+                  type="number"
+                  value={filters.priceMin} 
+                  onChange={(e) => setFilters((f) => ({ ...f, priceMin: e.target.value }))} 
+                />
+                <input 
+                  style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", borderWidth: "1px", borderColor: "#CBD5E1", flex: 1, boxSizing: "border-box" }} 
+                  placeholder="Max" 
+                  type="number"
+                  value={filters.priceMax} 
+                  onChange={(e) => setFilters((f) => ({ ...f, priceMax: e.target.value }))} 
+                />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {[["newest", "Newest"], ["lowest", "Lowest"], ["highest", "Highest"], ["popularity", "Popularity"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.sort === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, sort: value }))}>
-                    <Text style={[styles.chipText, filters.sort === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
+                  <button 
+                    key={value}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: filters.sort === value ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: filters.sort === value ? "#2563EB" : "#FFF",
+                      color: filters.sort === value ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setFilters((f) => ({ ...f, sort: value }))}
+                  >
+                    {label}
+                  </button>
                 ))}
-              </View>
-            </View>
+              </div>
+            </div>
             {sortedCatalog.map((product) => (
-              <View key={product.id || product.sku} style={styles.card}>
+              <div key={product.id || product.sku} style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
                 {product?.imageUrl || product?.photoUrl ? (
-                  <Image
-                    source={{ uri: product.imageUrl || product.photoUrl }}
-                    style={styles.productImage}
-                    resizeMode="cover"
+                  <img
+                    src={product.imageUrl || product.photoUrl}
+                    style={{ width: "100%", height: "170px", borderRadius: "12px", marginBottom: "12px", backgroundColor: "#E2E8F0", objectFit: "cover" }}
+                    alt={product.name}
                   />
                 ) : null}
-                <Text style={styles.cardTitle}>{product.name}</Text>
-                <Text style={styles.cardMeta}>{`${product.brand || "Brand"} • ${product.category || "Category"} • ${formatMoney(product.price)}`}</Text>
-                <Text style={styles.cardMeta}>{product.stock > 0 ? "Available" : "Out of stock"}</Text>
-                <View style={styles.row}>
-                  <TouchableOpacity style={styles.actionButton} onPress={() => setSelectedProduct(product)}>
-                    <Text style={styles.actionText}>Details</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.actionButton, product.stock <= 0 && styles.disabledButton]} onPress={() => addToCart(product)} disabled={product.stock <= 0}>
-                    <Text style={styles.actionText}>Add cart</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+                <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>{product.name}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`${product.brand || "Brand"} • ${product.category || "Category"} • ${formatMoney(product.price)}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{product.stock > 0 ? "Available" : "Out of stock"}</div>
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <button 
+                    style={{ backgroundColor: "#1D4ED8", color: "#FFF", padding: "10px 12px", borderRadius: "12px", border: "none", cursor: "pointer", fontWeight: "600" }}
+                    onClick={() => setSelectedProduct(product)}
+                  >
+                    Details
+                  </button>
+                  <button 
+                    style={{ 
+                      backgroundColor: product.stock <= 0 ? "#94A3B8" : "#1D4ED8", 
+                      color: "#FFF", 
+                      padding: "10px 12px", 
+                      borderRadius: "12px", 
+                      border: "none", 
+                      cursor: product.stock <= 0 ? "not-allowed" : "pointer",
+                      fontWeight: "600"
+                    }} 
+                    onClick={() => addToCart(product)}
+                    disabled={product.stock <= 0}
+                  >
+                    Add cart
+                  </button>
+                </div>
+              </div>
             ))}
             {selectedProduct ? (
-              <View style={styles.card}>
+              <div style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
                 {selectedProduct?.imageUrl || selectedProduct?.photoUrl ? (
-                  <Image
-                    source={{ uri: selectedProduct.imageUrl || selectedProduct.photoUrl }}
-                    style={styles.detailImage}
-                    resizeMode="cover"
+                  <img
+                    src={selectedProduct.imageUrl || selectedProduct.photoUrl}
+                    style={{ width: "100%", height: "220px", borderRadius: "12px", marginBottom: "12px", backgroundColor: "#E2E8F0", objectFit: "cover" }}
+                    alt={selectedProduct.name}
                   />
                 ) : null}
-                <Text style={styles.cardTitle}>Selected: {selectedProduct.name}</Text>
-                <Text style={styles.cardMeta}>{selectedProduct.description || "ICT product"}</Text>
+                <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>Selected: {selectedProduct.name}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{selectedProduct.description || "ICT product"}</div>
                 {selectedProduct.specifications && Object.entries(selectedProduct.specifications)
                   .filter(([, value]) => value != null && String(value).trim() && !/^n\/?a$/i.test(String(value).trim()))
                   .map(([key, value]) => (
-                    <Text key={key} style={styles.cardMeta}>{`${key}: ${value}`}</Text>
+                    <div key={key} style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`${key}: ${value}`}</div>
                   ))}
-                <Text style={styles.cardMeta}>{`Stock: ${selectedProduct.stock > 0 ? "Available" : "Out of stock"} (${Math.round(selectedProduct.stock)})`}</Text>
-              </View>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`Stock: ${selectedProduct.stock > 0 ? "Available" : "Out of stock"} (${Math.round(selectedProduct.stock)})`}</div>
+              </div>
             ) : null}
           </>
         )}
 
         {screen === "cart" && (
           <>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Checkout</Text>
-              <TextInput style={styles.input} placeholder="Full name" value={deliveryForm.fullName} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, fullName: text }))} />
-              <TextInput style={styles.input} placeholder="Phone number" keyboardType="phone-pad" value={deliveryForm.phone} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, phone: text }))} />
-              <TextInput style={styles.input} placeholder="District" value={deliveryForm.district} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, district: text }))} />
-              <TextInput style={styles.input} placeholder="Town" value={deliveryForm.town} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, town: text }))} />
-              <TextInput style={[styles.input, styles.textArea]} placeholder="Address" multiline value={deliveryForm.address} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, address: text }))} />
-              <View style={styles.filterRow}>
+            <div style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
+              <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>Checkout</div>
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Full name" 
+                value={deliveryForm.fullName} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, fullName: e.target.value }))} 
+              />
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Phone number" 
+                type="tel"
+                value={deliveryForm.phone} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, phone: e.target.value }))} 
+              />
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="District" 
+                value={deliveryForm.district} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, district: e.target.value }))} 
+              />
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Town" 
+                value={deliveryForm.town} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, town: e.target.value }))} 
+              />
+              <textarea 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box", minHeight: "100px" }} 
+                placeholder="Address" 
+                value={deliveryForm.address} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, address: e.target.value }))} 
+              />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
                 {[["Delivery", "Delivery"], ["Pickup", "Pickup"]].map((option) => (
-                  <TouchableOpacity key={option[0]} style={[styles.chip, deliveryForm.deliveryOption === option[0] && styles.chipActive]} onPress={() => setDeliveryForm((f) => ({ ...f, deliveryOption: option[0] }))}>
-                    <Text style={[styles.chipText, deliveryForm.deliveryOption === option[0] && styles.chipTextActive]}>{option[1]}</Text>
-                  </TouchableOpacity>
+                  <button 
+                    key={option[0]}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: deliveryForm.deliveryOption === option[0] ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: deliveryForm.deliveryOption === option[0] ? "#2563EB" : "#FFF",
+                      color: deliveryForm.deliveryOption === option[0] ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setDeliveryForm((f) => ({ ...f, deliveryOption: option[0] }))}
+                  >
+                    {option[1]}
+                  </button>
                 ))}
-              </View>
-              <TextInput style={styles.input} placeholder="Pickup point" value={deliveryForm.pickupPoint} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, pickupPoint: text }))} />
-              <View style={styles.filterRow}>
+              </div>
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Pickup point" 
+                value={deliveryForm.pickupPoint} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, pickupPoint: e.target.value }))} 
+              />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
                 {["M-Pesa", "EcoCash", "Bank Card"].map((payment) => (
-                  <TouchableOpacity key={payment} style={[styles.chip, deliveryForm.paymentMethod === payment && styles.chipActive]} onPress={() => setDeliveryForm((f) => ({ ...f, paymentMethod: payment }))}>
-                    <Text style={[styles.chipText, deliveryForm.paymentMethod === payment && styles.chipTextActive]}>{payment}</Text>
-                  </TouchableOpacity>
+                  <button 
+                    key={payment}
+                    style={{ 
+                      borderRadius: "999px", 
+                      borderWidth: "1px", 
+                      borderColor: deliveryForm.paymentMethod === payment ? "#2563EB" : "#CBD5E1",
+                      backgroundColor: deliveryForm.paymentMethod === payment ? "#2563EB" : "#FFF",
+                      color: deliveryForm.paymentMethod === payment ? "#FFF" : "#0F172A",
+                      padding: "8px 14px", 
+                      cursor: "pointer",
+                      border: "none"
+                    }} 
+                    onClick={() => setDeliveryForm((f) => ({ ...f, paymentMethod: payment }))}
+                  >
+                    {payment}
+                  </button>
                 ))}
-              </View>
-              <Text style={styles.cardMeta}>Amount to pay: {formatMoney(cartTotal())}</Text>
-              <TextInput style={styles.input} placeholder="Simulated payment amount" keyboardType="numeric" value={deliveryForm.paymentAmount} onChangeText={(text) => setDeliveryForm((f) => ({ ...f, paymentAmount: text }))} />
-            </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Cart</Text>
-              <Text style={styles.cardMeta}>{cart.length} item(s) - {formatMoney(cartTotal())}</Text>
-              <Text style={styles.statusBadge}>{statusMessage}</Text>
+              </div>
+              <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>Amount to pay: {formatMoney(cartTotal())}</div>
+              <input 
+                style={{ backgroundColor: "#FFF", borderRadius: "12px", padding: "12px", marginBottom: "12px", borderWidth: "1px", borderColor: "#CBD5E1", width: "100%", boxSizing: "border-box" }} 
+                placeholder="Simulated payment amount" 
+                type="number"
+                value={deliveryForm.paymentAmount} 
+                onChange={(e) => setDeliveryForm((f) => ({ ...f, paymentAmount: e.target.value }))} 
+              />
+            </div>
+            <div style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
+              <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>Cart</div>
+              <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{cart.length} item(s) - {formatMoney(cartTotal())}</div>
+              <div style={{ borderRadius: "12px", padding: "10px", backgroundColor: "#E2E8F0", marginBottom: "12px", color: "#0F172A" }}>{statusMessage}</div>
               {cart.length ? cart.map((item) => (
-                <View key={item.sku} style={styles.cartRow}>
-                  <View style={styles.cartInfo}>
-                    {item?.imageUrl ? (
-                      <Image
-                        source={{ uri: item.imageUrl }}
-                        style={styles.cartImage}
-                        resizeMode="cover"
-                      />
-                    ) : null}
-                    <Text style={styles.cardTitle}>{item.name}</Text>
-                    <Text style={styles.cardMeta}>{`${item.sku} • Qty ${Math.round(item.qty)} • ${formatMoney(Math.round(Number(item.price || 0)) * Math.round(Number(item.qty || 1)))}`}</Text>
-                  </View>
-                  <View style={styles.quantityRow}>
-                    <TouchableOpacity style={styles.qtyButton} onPress={() => updateCartQty(item, Math.round(Number(item.qty || 1)) - 1)}><Text style={styles.actionText}>-</Text></TouchableOpacity>
-                    <Text style={styles.cardMeta}>{Math.round(item.qty)}</Text>
-                    <TouchableOpacity style={styles.qtyButton} onPress={() => updateCartQty(item, Math.round(Number(item.qty || 1)) + 1)}><Text style={styles.actionText}>+</Text></TouchableOpacity>
-                  </View>
-                  <TouchableOpacity style={styles.deleteButton} onPress={() => removeCartItem(item)}><Text style={styles.actionText}>Remove</Text></TouchableOpacity>
-                </View>
-              )) : <Text style={styles.cardMeta}>Cart is empty. Add products from Products.</Text>}
-              <TouchableOpacity style={[styles.primaryButton, !cart.length && styles.disabledButton]} onPress={checkoutCart} disabled={!cart.length}>
-                <Text style={styles.primaryText}>Place order</Text>
-              </TouchableOpacity>
-            </View>
+                <div key={item.sku} style={{ backgroundColor: "#F8FAFC", borderRadius: "12px", padding: "12px", marginBottom: "12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div style={{ flex: 1 }}>
+                      {item?.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          style={{ width: "100%", height: "120px", borderRadius: "10px", marginBottom: "10px", backgroundColor: "#E2E8F0", objectFit: "cover" }}
+                          alt={item.name}
+                        />
+                      ) : null}
+                      <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A" }}>{item.name}</div>
+                      <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`${item.sku} • Qty ${Math.round(item.qty)} • ${formatMoney(Math.round(Number(item.price || 0)) * Math.round(Number(item.qty || 1)))}`}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", marginTop: "8px", alignItems: "center" }}>
+                    <button 
+                      style={{ backgroundColor: "#1D4ED8", color: "#FFF", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", width: "40px" }}
+                      onClick={() => updateCartQty(item, Math.round(Number(item.qty || 1)) - 1)}
+                    >
+                      -
+                    </button>
+                    <div style={{ fontSize: "14px", color: "#475569", minWidth: "20px", textAlign: "center" }}>{Math.round(item.qty)}</div>
+                    <button 
+                      style={{ backgroundColor: "#1D4ED8", color: "#FFF", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", width: "40px" }}
+                      onClick={() => updateCartQty(item, Math.round(Number(item.qty || 1)) + 1)}
+                    >
+                      +
+                    </button>
+                    <button 
+                      style={{ backgroundColor: "#EF4444", color: "#FFF", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", marginLeft: "auto" }}
+                      onClick={() => removeCartItem(item)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )) : <div style={{ fontSize: "14px", color: "#475569" }}>Cart is empty. Add products from Products.</div>}
+              <button 
+                style={{ 
+                  backgroundColor: !cart.length ? "#94A3B8" : "#2563EB", 
+                  color: "#FFF", 
+                  padding: "14px", 
+                  borderRadius: "12px", 
+                  border: "none", 
+                  cursor: !cart.length ? "not-allowed" : "pointer",
+                  fontWeight: "700",
+                  width: "100%",
+                  marginTop: "8px"
+                }}
+                onClick={checkoutCart}
+                disabled={!cart.length}
+              >
+                Place order
+              </button>
+            </div>
           </>
         )}
 
         {screen === "orders" && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Orders</Text>
+          <div style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
+            <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>Orders</div>
             {orders.length ? orders.map((order) => (
-              <View key={order.id} style={styles.card}>
-                <Text style={styles.cardTitle}>{`${order.id} • ${formatMoney(order.total)}`}</Text>
-                <Text style={styles.cardMeta}>{`${order.paymentStatus || "Payment Successful"} • ${order.paymentMethod || "Payment method"} • ${order.status || "Processing"}`}</Text>
-                <Text style={styles.cardMeta}>{`Receipt ${order.receiptNumber || "generated"}`}</Text>
-                <Text style={styles.cardMeta}>{`Phone: ${order.customerPhone || order.delivery?.phone || "Not recorded"}`}</Text>
-                <Text style={styles.cardMeta}>{`Location: ${order.customerLocation || "Not specified"}`}</Text>
-                <Text style={styles.cardMeta}>{`Amount paid: ${formatMoney(order.amountPaid)}`}</Text>
-              </View>
-            )) : <Text style={styles.cardMeta}>No orders yet. Checkout receipts will appear here.</Text>}
-          </View>
+              <div key={order.id} style={{ backgroundColor: "#FFF", borderRadius: "16px", padding: "16px", marginBottom: "16px", borderWidth: "1px", borderColor: "#E2E8F0" }}>
+                <div style={{ fontSize: "16px", fontWeight: "700", color: "#0F172A", marginBottom: "6px" }}>{`${order.id} • ${formatMoney(order.total)}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`${order.paymentStatus || "Payment Successful"} • ${order.paymentMethod || "Payment method"} • ${order.status || "Processing"}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`Receipt ${order.receiptNumber || "generated"}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`Phone: ${order.customerPhone || order.delivery?.phone || "Not recorded"}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`Location: ${order.customerLocation || "Not specified"}`}</div>
+                <div style={{ fontSize: "14px", color: "#475569", marginBottom: "4px" }}>{`Amount paid: ${formatMoney(order.amountPaid)}`}</div>
+              </div>
+            )) : <div style={{ fontSize: "14px", color: "#475569" }}>No orders yet. Checkout receipts will appear here.</div>}
+          </div>
         )}
-      </ScrollView>
-      <View style={styles.footer}>
-        {renderNavButton("products", "Products")}
-        {renderNavButton("cart", "Cart")}
-        {renderNavButton("orders", "Orders")}
-      </View>
-    </SafeAreaView>
+      </div>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, display: "flex", flexWrap: "wrap", justifyContent: "space-between", padding: "12px", backgroundColor: "#FFFFFF", borderTopWidth: "1px", borderTopColor: "#E2E8F0" }}>
+        <button 
+          style={{ 
+            flex: 1, 
+            padding: "10px", 
+            marginHorizontal: "2px", 
+            borderRadius: "12px", 
+            backgroundColor: screen === "products" ? "#2563EB" : "#F8FAFC",
+            color: screen === "products" ? "#FFF" : "#334155",
+            fontWeight: "600",
+            border: "none",
+            cursor: "pointer",
+            margin: "2px"
+          }}
+          onClick={() => setScreen("products")}
+        >
+          Products
+        </button>
+        <button 
+          style={{ 
+            flex: 1, 
+            padding: "10px", 
+            marginHorizontal: "2px", 
+            borderRadius: "12px", 
+            backgroundColor: screen === "cart" ? "#2563EB" : "#F8FAFC",
+            color: screen === "cart" ? "#FFF" : "#334155",
+            fontWeight: "600",
+            border: "none",
+            cursor: "pointer",
+            margin: "2px"
+          }}
+          onClick={() => setScreen("cart")}
+        >
+          Cart
+        </button>
+        <button 
+          style={{ 
+            flex: 1, 
+            padding: "10px", 
+            marginHorizontal: "2px", 
+            borderRadius: "12px", 
+            backgroundColor: screen === "orders" ? "#2563EB" : "#F8FAFC",
+            color: screen === "orders" ? "#FFF" : "#334155",
+            fontWeight: "600",
+            border: "none",
+            cursor: "pointer",
+            margin: "2px"
+          }}
+          onClick={() => setScreen("orders")}
+        >
+          Orders
+        </button>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-          <>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryTitle}>MRR services</Text>
-              <Text style={styles.summaryValue}>M6,740</Text>
-              <Text style={styles.summaryMeta}>Next renewal: 2026-06-14</Text>
-            </View>
-            <TouchableOpacity style={styles.scanCard} onPress={() => { setScreen("scan"); setScanEnabled(true); }}>
-              <Text style={styles.scanTitle}>Scan barcode</Text>
-              <Text style={styles.scanMeta}>{scannedContent || "Tap to scan with Expo Go"}</Text>
-            </TouchableOpacity>
-            {assets.map((asset) => (
-              <View key={asset.id} style={styles.card}>
-                <Text style={styles.cardTitle}>{asset.name}</Text>
-                <Text style={styles.cardMeta}>{`${asset.type} - expires ${asset.expires}`}</Text>
-                <TouchableOpacity style={styles.actionButton} onPress={() => setStatusMessage(`${asset.action} opened`)}>
-                  <Text style={styles.actionText}>{asset.action}</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </>
-        )}
-
-        {screen === "shop" && (
-          <>
-            <View style={styles.filterPanel}>
-              <TextInput style={styles.input} placeholder="Search products" value={filters.search} onChangeText={(text) => setFilters((f) => ({ ...f, search: text }))} />
-              <View style={styles.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {["all", ...ICT_CATEGORIES].map((category) => (
-                    <TouchableOpacity key={category} style={[styles.chip, filters.category === category && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, category }))}>
-                      <Text style={[styles.chipText, filters.category === category && styles.chipTextActive]}>{category === "all" ? "All" : category}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              <View style={styles.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {["all", ...filteredBrands].map((brand) => (
-                    <TouchableOpacity key={brand} style={[styles.chip, filters.brand === brand && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, brand }))}>
-                      <Text style={[styles.chipText, filters.brand === brand && styles.chipTextActive]}>{brand === "all" ? "All brands" : brand}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              <View style={styles.filterRow}>
-                {[["all", "Any"], ["Available", "Available"], ["Out of stock", "Out of stock"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.availability === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, availability: value }))}>
-                    <Text style={[styles.chipText, filters.availability === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.filterRow}>
-                {[["all", "All cond"], ["New", "New"], ["Used", "Used"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.condition === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, condition: value }))}>
-                    <Text style={[styles.chipText, filters.condition === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.priceRow}>
-                <TextInput style={[styles.input, styles.priceInput]} placeholder="Min" keyboardType="numeric" value={filters.priceMin} onChangeText={(text) => setFilters((f) => ({ ...f, priceMin: text }))} />
-                <TextInput style={[styles.input, styles.priceInput]} placeholder="Max" keyboardType="numeric" value={filters.priceMax} onChangeText={(text) => setFilters((f) => ({ ...f, priceMax: text }))} />
-              </View>
-              <View style={styles.filterRow}>
-                {[["newest", "Newest"], ["lowest", "Lowest"], ["highest", "Highest"], ["popularity", "Popularity"]].map(([value, label]) => (
-                  <TouchableOpacity key={value} style={[styles.chip, filters.sort === value && styles.chipActive]} onPress={() => setFilters((f) => ({ ...f, sort: value }))}>
-                    <Text style={[styles.chipText, filters.sort === value && styles.chipTextActive]}>{label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            {sortedCatalog.map((product) => (
-              <View key={product.id || product.sku} style={styles.card}>
-                {productPhoto(product)}
-                <Text style={styles.cardTitle}>{product.name}</Text>
-                <Text style={styles.cardMeta}>{`${product.brand || "Brand"} • ${product.category || "Category"} • ${formatMoney(product.price)}`}</Text>
-                <Text style={styles.cardMeta}>{product.stock > 0 ? "Available" : "Out of stock"}</Text>
-                <View style={styles.row}>
-                  <TouchableOpacity style={styles.actionButton} onPress={() => setSelectedProduct(product)}>
-                    <Text style={styles.actionText}>Details</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.actionButton, product.stock <= 0 && styles.disabledButton]} onPress={() => addToCart(product)} disabled={product.stock <= 0}>
-                    <Text style={styles.actionText}>Add cart</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-            {selectedProduct ? (
-              <View style={styles.card}>
-                {productPhoto(selectedProduct, styles.detailImage)}
-                <Text style={styles.cardTitle}>Selected: {selectedProduct.name}</Text>
-                <Text style={styles.cardMeta}>{selectedProduct.description || "ICT product"}</Text>
-                {selectedProduct.specifications && Object.entries(selectedProduct.specifications)
-                  .filter(([, value]) => value != null && String(value).trim() && !/^n\/?a$/i.test(String(value).trim()))
-                  .map(([key, value]) => (
-                    <Text key={key} style={styles.cardMeta}>{`${key}: ${value}`}</Text>
-                  ))}
-                <Text style={styles.cardMeta}>{`Stock: ${selectedProduct.stock > 0 ? "Available" : "Out of stock"} (${selectedProduct.stock})`}</Text>
-              </View>
-            ) : null}
-          </>
-        )}
-
-        {screen === "builder" && (
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Custom PC Builder</Text>
